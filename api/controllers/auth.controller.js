@@ -1,5 +1,6 @@
 import User from "../modules/user.model.js";
-import bcryptjs from 'bcryptjs'
+import bcryptjs from 'bcryptjs';
+import jwt from 'jsonwebtoken'
 
 export const signUp = async(req, res, next) => {
     const {
@@ -26,4 +27,42 @@ export const signUp = async(req, res, next) => {
     } catch (error) {
         next(error);
     }
-}
+};
+
+
+
+export const signIn = async(req, res, next) => {
+    const { userNameOrEmail, password } = req.body;
+    try {
+        console.log('Received signIn request with:', userNameOrEmail, password);
+        const validUser = await User.findOne({
+            $or: [
+                { userName: userNameOrEmail }, { email: userNameOrEmail }
+            ]
+        });
+        console.log('Found user:', validUser);
+
+        if (!validUser) {
+            console.log('User not found!');
+            return next(errorHandler(404, 'User not found!'));
+        }
+
+        const validPassword = bcryptjs.compareSync(password, validUser.password);
+        console.log('Password is valid:', validPassword);
+
+        if (!validPassword) {
+            console.log('Wrong credentials!');
+            return next(errorHandler(401, 'Wrong credentials!'));
+        }
+
+        const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET);
+        console.log('Generated token:', token);
+
+        res
+            .cookie('access_token', token, { httpOnly: true })
+            .status(200)
+            .json(validUser);
+    } catch (error) {
+        error(next);
+    }
+};
