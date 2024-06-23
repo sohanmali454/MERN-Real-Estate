@@ -1,6 +1,8 @@
 import User from "../modules/user.model.js";
 import bcryptjs from 'bcryptjs';
 import jwt from 'jsonwebtoken'
+import { errorHandler } from "../utils/error.js";
+
 
 export const signUp = async(req, res, next) => {
     const {
@@ -65,6 +67,6 @@ export const signIn = async(req, res, next) => {
             .status(200)
             .json(rest);
     } catch (error) {
-        error(next);
+        next(error);
     }
 };
