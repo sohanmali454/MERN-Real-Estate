@@ -13,6 +13,7 @@ export const signUp = async(req, res, next) => {
         return res.status(400).json({ message: "All fields are required" })
     }
 
+    //encrypt password in hashcode
     const hashedPassword = bcryptjs.hashSync(password, 10);
 
     const newUser = new User({
@@ -46,7 +47,7 @@ export const signIn = async(req, res, next) => {
             console.log('User not found!');
             return next(errorHandler(404, 'User not found!'));
         }
-
+        //Decrypt password in hashcode
         const validPassword = bcryptjs.compareSync(password, validUser.password);
         console.log('Password is valid:', validPassword);
 
@@ -57,11 +58,12 @@ export const signIn = async(req, res, next) => {
 
         const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET);
         console.log('Generated token:', token);
+        const { password: pass, ...rest } = validUser._doc;
 
         res
             .cookie('access_token', token, { httpOnly: true })
             .status(200)
-            .json(validUser);
+            .json(rest);
     } catch (error) {
         error(next);
     }
