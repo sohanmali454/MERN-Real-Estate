@@ -12,6 +12,9 @@ import {
   updateUserStart,
   updateUserFailure,
   updateUserSuccess,
+  deleteUserFailure,
+  deleteUserStart,
+  deleteUserSucess,
 } from "../redux/user/userSlice";
 import { useDispatch } from "react-redux";
 
@@ -41,7 +44,7 @@ export default function Profile() {
     const uploadTask = uploadBytesResumable(storageRef, file);
 
     uploadTask.on(
-      'state_changed',
+      "state_changed",
       (snapshot) => {
         const progress =
           (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
@@ -84,6 +87,23 @@ export default function Profile() {
       setUpdateSuccess(true);
     } catch (error) {
       dispatch(updateUserFailure(error.message));
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    try {
+      dispatch(deleteUserStart());
+      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (res.success === false) {
+        dispatch(deleteUserFailure(data.message));
+        return;
+      }
+      dispatch(deleteUserSucess(data));
+    } catch (error) {
+      dispatch(deleteUserFailure(error.message));
     }
   };
 
@@ -148,7 +168,12 @@ export default function Profile() {
         </button>
       </form>
       <div className="flex justify-between mt-5">
-        <span className="text-red-700 cursor-pointer ">Delete Account</span>
+        <span
+          onClick={handleDeleteUser}
+          className="text-red-700 cursor-pointer "
+        >
+          Delete Account
+        </span>
         <span className="text-red-700 cursor-pointer ">Sign Out</span>
       </div>
     </div>
