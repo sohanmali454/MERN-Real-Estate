@@ -6,6 +6,7 @@ import {
   ref,
   getDownloadURL,
 } from "firebase/storage";
+
 import { app } from "../firebase";
 import {
   updateUserStart,
@@ -40,7 +41,7 @@ export default function Profile() {
     const uploadTask = uploadBytesResumable(storageRef, file);
 
     uploadTask.on(
-      "state_changed",
+      'state_changed',
       (snapshot) => {
         const progress =
           (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
@@ -60,6 +61,7 @@ export default function Profile() {
   const handleChange = (event) => {
     setFormData({ ...formData, [event.target.id]: event.target.value });
   };
+  console.log(formData);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
